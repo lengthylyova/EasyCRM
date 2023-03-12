@@ -24,8 +24,8 @@ class Subject(models.Model):
 
 class Group(models.Model):
     name = models.CharField(max_length=20)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='groups', default=None)
     students = models.ManyToManyField(Student, related_name='groups')
 
 

@@ -64,6 +64,16 @@ def sp_student_groups(request, id):
         return JsonResponse({"success":True})
 
 
+def sp_student_visits(request, id):
+    try:
+        student = Student.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such student"})
+
+    if request.method == 'GET':
+        data = list(student.visits.values())
+        return JsonResponse(data, safe=False)
+
 def sp_student_delete(request, id):
     if request.method == 'GET':
         return JsonResponse({'saccess':False, "error":"wrong request method"})
@@ -107,6 +117,33 @@ def sp_teacher(request, id):
         if not data:
             return JsonResponse({"success":False, "error":"no such teacher"})
         return JsonResponse(data, safe=False)
+
+
+def sp_teacher_groups(request, id):
+    try:
+        teacher = Teacher.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such teacher"})
+
+    if request.method == 'GET':
+        data = list(teacher.groups.values())
+        return JsonResponse(data, safe=False)
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+        try:
+            group_id = r['group_id']
+        except:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        try:
+            teacher.groups.get(id=group_id)
+            return JsonResponse({"success":False, "error":"teacher already owns this group"})
+        except:
+            teacher.groups.add(group_id)
+            teacher.save()
+
+        return JsonResponse({"success":True})
 
 
 def sp_teacher_delete(request, id):
@@ -286,6 +323,30 @@ def sp_lesson(request, id):
         if not data:
             return JsonResponse({"success":False, "error":"no such lesson"})
         return JsonResponse(data, safe=False)
+
+
+def sp_lesson_visits(request, id):
+    try:
+        lesson = Lesson.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such lesson"})
+
+    if request.method == 'GET':
+        data = list(lesson.visits.values())
+        return JsonResponse(data, safe=False)
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+        try:
+            student_id = r['student_id']
+        except:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        visit = Visit(student=Student.objects.get(id=student_id),
+                        lesson=Lesson.objects.get(id=id))
+        visit.save()
+
+        return JsonResponse({"success":True})
 
 
 def sp_lesson_delete(request, id):
