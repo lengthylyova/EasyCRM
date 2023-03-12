@@ -6,6 +6,7 @@ urlpatterns = [
     path('students/<int:id>/', views.sp_student, name='specific_student'),
     path('students/<int:id>/visits/', views.sp_student_visits, name='specific_student_visits'),
     path('students/<int:id>/groups/', views.sp_student_groups, name='specific_student_groups'),
+    path('students/<int:student_id>/groups/delete/<int:group_id>/', views.sp_student_group_delete, name='specific_student_group_delete'),
     path('students/delete/<int:id>/', views.sp_student_delete, name='specific_student_delete'),
 
     path('teachers/', views.teachers, name='teachers_all'),
@@ -16,6 +17,7 @@ urlpatterns = [
     path('groups/', views.groups, name='groups_all'),
     path('groups/<int:id>/', views.sp_group, name='specific_group'),
     path('groups/<int:id>/students', views.sp_group_students, name='specific_group_students'),
+    path('groups/<int:group_id>/students/delete/<int:student_id>/', views.sp_group_student_delete, name='specific_group_student_delete'),
     path('groups/delete/<int:id>/', views.sp_group_delete, name='specific_group_delete'),
 
     path('subjects/', views.subjects, name='subjects_all'),

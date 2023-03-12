@@ -74,6 +74,25 @@ def sp_student_visits(request, id):
         data = list(student.visits.values())
         return JsonResponse(data, safe=False)
 
+
+def sp_student_group_delete(request, student_id, group_id):
+    try:
+        student = Student.objects.get(id=student_id)
+    except:
+        return JsonResponse({"success":False, "error":"no such student"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            student.groups.remove(Group.objects.get(id=group_id))
+        except:
+            return JsonResponse({"saccess":False, "error":"student not in group"})
+
+        return JsonResponse({"success":True})
+
+
 def sp_student_delete(request, id):
     if request.method == 'GET':
         return JsonResponse({'saccess':False, "error":"wrong request method"})
@@ -268,6 +287,24 @@ def sp_group_students(request, id):
         except:
             group.students.add(student_id)
             group.save()
+
+        return JsonResponse({"success":True})
+
+
+def sp_group_student_delete(request, group_id, student_id):
+    try:
+        group = Group.objects.get(id=group_id)
+    except:
+        return JsonResponse({"success":False, "error":"no such student"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            group.students.remove(Student.objects.get(id=student_id))
+        except:
+            return JsonResponse({"saccess":False, "error":"student not in group"})
 
         return JsonResponse({"success":True})
 
