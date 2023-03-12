@@ -295,7 +295,7 @@ def sp_group_student_delete(request, group_id, student_id):
     try:
         group = Group.objects.get(id=group_id)
     except:
-        return JsonResponse({"success":False, "error":"no such student"})
+        return JsonResponse({"success":False, "error":"no such group"})
 
     if request.method == 'GET':
         return JsonResponse({'saccess':False, "error":"wrong request method"})
@@ -379,9 +379,31 @@ def sp_lesson_visits(request, id):
         except:
             return JsonResponse({"success":False, "error":"request isn't full"})
 
-        visit = Visit(student=Student.objects.get(id=student_id),
+        try:
+            Visit.objects.get(student_id=student_id, lesson_id=id)
+            return JsonResponse({"success":False, "error":"visit already exists"})
+        except:    
+            visit = Visit(student=Student.objects.get(id=student_id),
                         lesson=Lesson.objects.get(id=id))
-        visit.save()
+            visit.save()
+
+        return JsonResponse({"success":True})
+
+
+def sp_lesson_visit_delete(request, lesson_id, student_id):
+    try:
+        lesson = Lesson.objects.get(id=lesson_id)
+    except:
+        return JsonResponse({"success":False, "error":"no such lesson"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            Visit.objects.get(student_id=student_id).delete()
+        except:
+            return JsonResponse({"saccess":False, "error":"student did not visit lesson"})
 
         return JsonResponse({"success":True})
 
