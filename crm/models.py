@@ -30,7 +30,7 @@ class Group(models.Model):
 
 
 class Lesson(models.Model):
-    group = models.ForeignKey(Group, on_delete=models.DO_NOTHING)
+    group = models.ForeignKey(Group, on_delete=models.DO_NOTHING, default=None)
     datetime = models.DateTimeField(auto_now_add=False, default=None)
 
 

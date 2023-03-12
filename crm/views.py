@@ -37,6 +37,33 @@ def sp_student(request, id):
         return JsonResponse(data, safe=False)
 
 
+def sp_student_groups(request, id):
+    try:
+        student = Student.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such student"})
+
+    if request.method == 'GET':
+        data = list(student.groups.values())
+        return JsonResponse(data, safe=False)
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+        try:
+            group_id = r['group_id']
+        except:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        try:
+            student.groups.get(id=group_id)
+            return JsonResponse({"success":False, "error":"student already in group"})
+        except:
+            student.groups.add(group_id)
+            student.save()
+            
+        return JsonResponse({"success":True})
+
+
 def sp_student_delete(request, id):
     if request.method == 'GET':
         return JsonResponse({'saccess':False, "error":"wrong request method"})
@@ -179,6 +206,33 @@ def sp_group(request, id):
         if not data:
             return JsonResponse({"success":False, "error":"no such group"})
         return JsonResponse(data, safe=False)
+
+
+def sp_group_students(request, id):
+    try:
+        group = Group.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such group"})
+
+    if request.method == 'GET':
+        data = list(group.students.values())
+        return JsonResponse(data, safe=False)
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+        try:
+            student_id = r['student_id']
+        except:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        try:
+            group.students.get(id=student_id)
+            return JsonResponse({"success":False, "error":"student already in group"})
+        except:
+            group.students.add(student_id)
+            group.save()
+
+        return JsonResponse({"success":True})
 
 
 def sp_group_delete(request, id):
