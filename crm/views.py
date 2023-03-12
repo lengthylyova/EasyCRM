@@ -29,6 +29,28 @@ def students(request):
         return JsonResponse({"success":True})
 
 
+def sp_student(request, id):
+    if request.method == 'GET':
+        data = list(Student.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such student"})
+        return JsonResponse(data, safe=False)
+
+
+def sp_student_delete(request, id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            student = Student.objects.get(id=id)
+        except:
+            return JsonResponse({"success":False, "error":"no such student"})
+
+        student.delete()
+        return JsonResponse({"success":True})
+            
+
 # TEACHERS
 def teachers(request):
     if request.method == 'GET':
@@ -49,6 +71,28 @@ def teachers(request):
             return JsonResponse({"success":False, "error":"request isn't full"})
 
         teacher.save()
+        return JsonResponse({"success":True})
+
+
+def sp_teacher(request, id):
+    if request.method == 'GET':
+        data = list(Teacher.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such teacher"})
+        return JsonResponse(data, safe=False)
+
+
+def sp_teacher_delete(request, id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            teacher = Teacher.objects.get(id=id)
+        except:
+            return JsonResponse({"success":False, "error":"no such teacher"})
+
+        teacher.delete()
         return JsonResponse({"success":True})
 
 
@@ -73,6 +117,28 @@ def subjects(request):
         except:
             subject.save()
 
+        return JsonResponse({"success":True})
+
+
+def sp_subject(request, id):
+    if request.method == 'GET':
+        data = list(Subject.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such subject"})
+        return JsonResponse(data, safe=False)
+
+
+def sp_subject_delete(request, id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            subject = Subject.objects.get(id=id)
+        except:
+            return JsonResponse({"success":False, "error":"no such subject"})
+
+        subject.delete()
         return JsonResponse({"success":True})
 
 
@@ -107,6 +173,28 @@ def groups(request):
         return JsonResponse({"success":True})
 
 
+def sp_group(request, id):
+    if request.method == 'GET':
+        data = list(Group.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such group"})
+        return JsonResponse(data, safe=False)
+
+
+def sp_group_delete(request, id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            group = Group.objects.get(id=id)
+        except:
+            return JsonResponse({"success":False, "error":"no such group"})
+
+        group.delete()
+        return JsonResponse({"success":True})
+
+
 # LESSONS
 def lessons(request):
     if request.method == 'GET':
@@ -135,6 +223,28 @@ def lessons(request):
             return JsonResponse({"success":False, "error":"wrong datetime representation"})
 
         lesson.save()
+        return JsonResponse({"success":True})
+
+
+def sp_lesson(request, id):
+    if request.method == 'GET':
+        data = list(Lesson.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such lesson"})
+        return JsonResponse(data, safe=False)
+
+
+def sp_lesson_delete(request, id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            lesson = Lesson.objects.get(id=id)
+        except:
+            return JsonResponse({"success":False, "error":"no such lesson"})
+
+        lesson.delete()
         return JsonResponse({"success":True})
 
 
@@ -168,3 +278,24 @@ def visits(request):
 
         return JsonResponse({"success":True})
 
+
+def sp_visit(request, id):
+    if request.method == 'GET':
+        data = list(Visit.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such visit"})
+        return JsonResponse(data, safe=False)
+
+
+def sp_visit_delete(request, id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        try:
+            visit = Visit.objects.get(id=id)
+        except:
+            return JsonResponse({"success":False, "error":"no such visit"})
+
+        visit.delete()
+        return JsonResponse({"success":True})
