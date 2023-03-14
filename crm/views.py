@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.core import serializers
 from crm.models import Student, Teacher, Subject, Group, Visit, Lesson, Subscription
 from datetime import datetime
 import json
@@ -35,6 +34,30 @@ def sp_student(request, id):
         if not data:
             return JsonResponse({"success":False, "error":"no such student"})
         return JsonResponse(data, safe=False)
+
+
+def sp_student_edit(request, id):
+    try:
+        student = Student.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such student"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+
+        try:
+            student.name = r['name']
+            student.surname = r['surname']
+            student.gender = r['gender']
+            student.age = r['age']
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        student.save()
+        return JsonResponse({"success":True})
 
 
 def sp_student_groups(request, id):
@@ -138,6 +161,31 @@ def sp_teacher(request, id):
         return JsonResponse(data, safe=False)
 
 
+def sp_teacher_edit(request, id):
+    try:
+        teacher = Teacher.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such teacher"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+
+        try:
+            teacher.name = r['name']
+            teacher.surname = r['surname']
+            teacher.gender = r['gender']
+            teacher.age = r['age']
+            teacher.desc = r['desc']
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        teacher.save()
+        return JsonResponse({"success":True})
+
+
 def sp_teacher_groups(request, id):
     try:
         teacher = Teacher.objects.get(id=id)
@@ -211,6 +259,27 @@ def sp_subject(request, id):
         return JsonResponse(data, safe=False)
 
 
+def sp_subject_edit(request, id):
+    try:
+        subject = Subject.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such subject"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+
+        try:
+            subject.name = r['name']
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        subject.save()
+        return JsonResponse({"success":True})
+
+
 def sp_subject_delete(request, id):
     if request.method == 'GET':
         return JsonResponse({'saccess':False, "error":"wrong request method"})
@@ -262,6 +331,29 @@ def sp_group(request, id):
         if not data:
             return JsonResponse({"success":False, "error":"no such group"})
         return JsonResponse(data, safe=False)
+
+
+def sp_group_edit(request, id):
+    try:
+        group = Group.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such group"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+
+        try:
+            group.name = r['name']
+            group.teacher_id = r['teacher_id']
+            group.subject_id = r['subject_id']
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        group.save()
+        return JsonResponse({"success":True})
 
 
 def sp_group_students(request, id):
@@ -360,6 +452,39 @@ def sp_lesson(request, id):
         if not data:
             return JsonResponse({"success":False, "error":"no such lesson"})
         return JsonResponse(data, safe=False)
+
+
+def sp_lesson_edit(request, id):
+    try:
+        lesson = Lesson.objects.get(id=id)
+    except:
+        return JsonResponse({"success":False, "error":"no such lesson"})
+
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+
+        try:
+            if r["group"]:
+                group = r["group"]
+                try:
+                    lesson.group = Group.objects.get(id=group)
+                except:
+                    return JsonResponse({"success":False, "error":"no such group"})
+            date = r["date"]
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        try:
+            date = datetime(date["year"], date["month"], date["day"], date["hour"], date["minute"])
+            lesson.datetime = date
+        except:
+            return JsonResponse({"success":False, "error":"wrong datetime representation"})
+
+        lesson.save()
+        return JsonResponse({"success":True})
 
 
 def sp_lesson_visits(request, id):
@@ -550,6 +675,53 @@ def sp_subscription(request, student_id):
             print(list(Subscription.objects.filter(student_id=student_id).values()))
             return JsonResponse({"success":False, "error":"no such subscription"})
         return JsonResponse(data, safe=False)
+
+
+def sp_subscription_edit(request, student_id):
+    try:
+        student = Student.objects.get(id=student_id)
+    except:
+        return JsonResponse({"success":False, "error":"no such student"})
+
+    try:
+        subscription = Subscription.objects.get(student_id=student_id)
+    except:
+        return JsonResponse({"success":False, "error":"no such subscription"})
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+    
+        try:
+            lessons_left = r['lessons']
+            first_day = r['first_day']
+            duration = r['duration']
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        try:
+            year = first_day['year']
+            month = first_day['month']
+            day = first_day['day']
+            first_day = datetime(year=year, month=month, day=day)
+        except:
+            return JsonResponse({"success":False, "error":"wrong first_day format"})
+
+        subscription.first_day = first_day
+
+        try:
+            year = subscription.first_day.year + duration['year']
+            month = subscription.first_day.month + duration['month']
+            day = subscription.first_day.day + duration['day']
+            last_day = datetime(year=year, month=month, day=day)
+        except:
+            return JsonResponse({"success":False, "error":"wrong duration format"})
+
+        subscription.last_day = last_day
+
+        subscription.lessons_left = lessons_left
+        subscription.save()
+
+        return JsonResponse({"success":True})
 
 
 def sp_subscription_delete(request, student_id):
