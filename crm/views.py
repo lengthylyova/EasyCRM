@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
-from crm.models import Student, Teacher, Subject, Group, Visit, Lesson
+from crm.models import Student, Teacher, Subject, Group, Visit, Lesson, Subscription
 from datetime import datetime
 import json
 
@@ -379,6 +379,11 @@ def sp_lesson_visits(request, id):
         except:
             return JsonResponse({"success":False, "error":"request isn't full"})
 
+        subscription = Subscription.objects.get(student_id=student_id)
+        if subscription:
+            subscription.lessons_left -= 1
+            subscription.save()
+
         try:
             Visit.objects.get(student_id=student_id, lesson_id=id)
             return JsonResponse({"success":False, "error":"visit already exists"})
@@ -402,6 +407,10 @@ def sp_lesson_visit_delete(request, lesson_id, student_id):
     if request.method == 'POST':
         try:
             Visit.objects.get(student_id=student_id).delete()
+            subscription = Subscription.objects.get(student_id=student_id)
+            if subscription:
+                subscription.lessons_left += 1
+                subscription.save()
         except:
             return JsonResponse({"saccess":False, "error":"student did not visit lesson"})
 
@@ -417,6 +426,14 @@ def sp_lesson_delete(request, id):
             lesson = Lesson.objects.get(id=id)
         except:
             return JsonResponse({"success":False, "error":"no such lesson"})
+
+        for visit in lesson.visits.all():
+            student_id = visit.student.id
+
+            subscription = Subscription.objects.get(student_id=student_id)
+            if subscription:
+                subscription.lessons_left += 1
+                subscription.save()
 
         lesson.delete()
         return JsonResponse({"success":True})
@@ -437,6 +454,11 @@ def visits(request):
             lesson = r['lesson']
         except KeyError:
             return JsonResponse({"success":False, "error":"request isn't full"})
+
+        subscription = Subscription.objects.get(student_id=student)
+        if subscription:
+            subscription.lessons_left -= 1
+            subscription.save()
 
         try:
             visit.student = Student.objects.get(id=student)
@@ -471,6 +493,12 @@ def sp_visit_delete(request, id):
         except:
             return JsonResponse({"success":False, "error":"no such visit"})
 
+        student_id = visit.student.id
+        subscription = Subscription.objects.get(student_id=student_id)
+        if subscription:
+            subscription.lessons_left += 1
+            subscription.save()
+
         visit.delete()
         return JsonResponse({"success":True})
 
@@ -491,10 +519,13 @@ def subscriptions(request):
         except KeyError:
             return JsonResponse({"success":False, "error":"request isn't full"})
 
+        if Subscription.objects.get(student_id=student_id):
+            return JsonResponse({"success":False, "error":"subscription already exists"})
+
         try:
             student = Student.objects.get(id=student_id)
         except:
-            return JsonResponse("success":False, "error":"no such student")
+            return JsonResponse({"success":False, "error":"no such student"})
 
         try:
             year = datetime.today().year + duration['year']
@@ -502,21 +533,34 @@ def subscriptions(request):
             day = datetime.today().day + duration['day']
             last_day = datetime(year=year, month=month, day=day)
         except:
-            return JsonResponse("success":False, "error":"wrong duration format")
+            return JsonResponse({"success":False, "error":"wrong duration format"})
 
         subscription.student = student
         subscription.lessons_left = lessons_left
         subscription.last_day = last_day
+        subscription.save()
 
         return JsonResponse({"success":True})
 
 
-def sp_subscription(request, id):
+def sp_subscription(request, student_id):
     if request.method == 'GET':
-        data = list(Group.objects.filter(id=id).values())
+        data = list(Subscription.objects.filter(student_id=student_id).values())
         if not data:
+            print(list(Subscription.objects.filter(student_id=student_id).values()))
             return JsonResponse({"success":False, "error":"no such subscription"})
         return JsonResponse(data, safe=False)
 
 
+def sp_subscription_delete(request, student_id):
+    if request.method == 'GET':
+        return JsonResponse({'saccess':False, "error":"wrong request method"})
 
+    if request.method == 'POST':
+        try:
+            subscription = Subscription.objects.get(student_id=student_id)
+        except:
+            return JsonResponse({"success":False, "error":"no such subscription"})
+
+        subscription.delete()
+        return JsonResponse({"success":True})

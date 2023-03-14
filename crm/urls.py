@@ -35,5 +35,6 @@ urlpatterns = [
     path('lessons/delete/<int:id>/', views.sp_lesson_delete, name='specific_lesson_delete'),
 
     path('subscriptions/', views.subscriptions, name='subscriptions'),
-    path('subscriptions/', views.sp_subscription, name='sp_subscription'),
+    path('subscriptions/<int:student_id>/', views.sp_subscription, name='sp_subscription'),
+    path('subscriptions/delete/<int:student_id>/', views.sp_subscription_delete, name='sp_subscription_delete'),
 ]

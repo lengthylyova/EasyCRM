@@ -43,4 +43,4 @@ class Subscription(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='subscription')
     first_day = models.DateTimeField(auto_now_add=True)
     last_day = models.DateTimeField(auto_now_add=False, null=True, default=None)
-    lessons_left = IntegerField()
+    lessons_left = models.IntegerField()
