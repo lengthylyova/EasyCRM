@@ -33,4 +33,7 @@ urlpatterns = [
     path('lessons/<int:id>/visits/', views.sp_lesson_visits, name='specific_lesson_visits'),
     path('lessons/<int:lesson_id>/visits/delete/<int:student_id>/', views.sp_lesson_visit_delete, name='specific_lesson_visit_delete'),
     path('lessons/delete/<int:id>/', views.sp_lesson_delete, name='specific_lesson_delete'),
+
+    path('subscriptions/', views.subscriptions, name='subscriptions'),
+    path('subscriptions/', views.sp_subscription, name='sp_subscription'),
 ]

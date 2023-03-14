@@ -334,15 +334,15 @@ def lessons(request):
         lesson = Lesson()
 
         try:
-            group = r["group"]
+            if r["group"]:
+                group = r["group"]
+                try:
+                    lesson.group = Group.objects.get(id=group)
+                except:
+                    return JsonResponse({"success":False, "error":"no such group"})
             date = r["date"]
         except KeyError:
             return JsonResponse({"success":False, "error":"request isn't full"})
-
-        try:
-            lesson.group = Group.objects.get(id=group)
-        except:
-            return JsonResponse({"success":False, "error":"no such group"})
 
         try:
             date = datetime(date["year"], date["month"], date["day"], date["hour"], date["minute"])
@@ -473,3 +473,50 @@ def sp_visit_delete(request, id):
 
         visit.delete()
         return JsonResponse({"success":True})
+
+
+# SUBSCRIPTION
+def subscriptions(request):
+    if request.method == 'GET':
+        data = list(Subscription.objects.values())
+        return JsonResponse(data, safe=False)
+
+    if request.method == 'POST':
+        r = json.loads(request.body)
+        subscription = Subscription()
+        try:
+            student_id = r['student_id']
+            lessons_left = r['lessons']
+            duration = r['duration']
+        except KeyError:
+            return JsonResponse({"success":False, "error":"request isn't full"})
+
+        try:
+            student = Student.objects.get(id=student_id)
+        except:
+            return JsonResponse("success":False, "error":"no such student")
+
+        try:
+            year = datetime.today().year + duration['year']
+            month = datetime.today().month + duration['month']
+            day = datetime.today().day + duration['day']
+            last_day = datetime(year=year, month=month, day=day)
+        except:
+            return JsonResponse("success":False, "error":"wrong duration format")
+
+        subscription.student = student
+        subscription.lessons_left = lessons_left
+        subscription.last_day = last_day
+
+        return JsonResponse({"success":True})
+
+
+def sp_subscription(request, id):
+    if request.method == 'GET':
+        data = list(Group.objects.filter(id=id).values())
+        if not data:
+            return JsonResponse({"success":False, "error":"no such subscription"})
+        return JsonResponse(data, safe=False)
+
+
+
